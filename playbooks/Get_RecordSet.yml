@@ -1,0 +1,20 @@
+- name: Retrieve Value for Record Set on Route 53
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "get Route 53 {{rds_dns}} value"
+    route53:
+      command: get
+      zone: "{{hosted_zone}}"
+      record: "{{rds_dns}}"
+      type: CNAME
+    register: record
+
+  - debug: msg="{{record.set.value}}"
+
+  - debug: var=record.set.value.split('.')[0]
+
+  - set_fact:
+      dns_name: "{{record.set.value.split('.')[0]}}"
+
+  - copy: content="{{ dns_name }}" dest=./recordset.info

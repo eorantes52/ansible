@@ -1,0 +1,16 @@
+- name: Generate RDS Snapshot
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "Take Snapshot for RDS -> {{rds_instance}}"
+    rds:
+      command: snapshot
+      region: "{{region | default('us-east-1')}}"
+      instance_name: "{{rds_instance}}"
+      snapshot: "{{rds_snapshot}}"
+    register: snapshot_output
+    until: snapshot_output.snapshot.status == "available"
+    retries: 40
+    delay: 60
+
+  - debug: var=snapshot_output

@@ -1,0 +1,19 @@
+- name: take ami of ec2 instance
+  hosts: "{{target}}"
+  tasks:
+
+  - ec2_ami:
+      region: "{{region | default('us-east-1')}}"
+      no_reboot: yes
+      instance_id: "{{InstanceID}}"
+      wait: yes
+      name: "{{AMI_Name}}"
+      tags:
+        Name: "{{AMI_Name}}"
+        Env: "{{ENV}}"
+    register: get_ami
+  - debug: var=get_ami
+
+  - debug: msg="{{get_ami.image_id}}"
+
+  - copy: content="AmiID={{ get_ami.image_id }}" dest=./ami.info

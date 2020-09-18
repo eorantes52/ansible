@@ -1,0 +1,21 @@
+- name: Create Weighted Record Set Route 53
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "Creating Weighted Route 53-> {{record_set}} with weight -> {{weight}} and value -> {{value}}"
+    route53:
+      command: create
+      region: "{{region | default('us-east-1')}}"
+      zone: "{{hosted_zone}}"
+      record: "{{record_set}}"
+      type: CNAME
+      ttl: 60
+      value: "{{value}}"
+      overwrite: yes
+      # Routing policy
+      identifier: "{{set_id}}"
+      weight: "{{weight}}"
+    register: route53_output
+    delay: 90
+
+  - debug: var=route53_output

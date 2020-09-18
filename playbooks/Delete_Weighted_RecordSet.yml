@@ -1,0 +1,29 @@
+- name: Retrieve Value for Weighted Record Set on Route 53
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "get value of Record Set {{record_set}} with Set ID old"
+    route53:
+      command: get
+      zone: "{{hosted_zone}}"
+      record: "{{record_set}}"
+      type: CNAME
+      identifier: old
+      weight: 0
+    register: record_old
+
+  - debug: var=record_old
+
+  - name: "delete Record Set {{record_set}} with Set ID old using the results from the get command"
+    route53:
+      command: delete
+      zone: "{{hosted_zone}}"
+      record: "{{record_old.set.record}}"
+      ttl: "{{record_old.set.ttl}}"
+      type: "{{record_old.set.type}}"
+      value: "{{record_old.set.value}}"
+      identifier: "{{record_old.set.identifier}}"
+      weight: "{{record_old.set.weight}}"
+    register: rec
+
+  - debug: var=rec

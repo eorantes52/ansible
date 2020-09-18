@@ -1,0 +1,38 @@
+- name: Resize RDS
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "modify RDS instance type to {{rds_type}}"
+    rds:
+      command: modify
+      region: "{{region | default('us-east-1')}}"
+      instance_name: "{{rds_instance}}"
+      instance_type: "{{rds_type}}"
+      apply_immediately: yes
+      wait: yes
+      wait_timeout: 600
+    register: rds
+    delay: 15
+
+  - debug: var=rds
+
+  - name: Get RDS facts until status is modifying
+    rds:
+      command: facts
+      instance_name: "{{rds_instance}}"
+      region: "{{region | default('us-east-1')}}"
+    register: rds_facts
+    until: rds_facts.instance.status == "modifying"
+    retries: 3
+    delay: 15
+    ignore_errors: True
+
+  - name: Get RDS facts until status is available
+    rds:
+      command: facts
+      instance_name: "{{rds_instance}}"
+      region: "{{region | default('us-east-1')}}"
+    register: rds_facts
+    until: rds_facts.instance.status == "available"
+    retries: 40
+    delay: 30

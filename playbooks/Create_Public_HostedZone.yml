@@ -1,0 +1,11 @@
+- name: Create a public zone
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "Creating Hosted Zone-> {{hosted_zone}}"
+    route53_zone:
+      zone: "{{hosted_zone}}"
+      comment: My New Hosted Zone
+    register: route53_output
+
+  - debug: var=route53_output

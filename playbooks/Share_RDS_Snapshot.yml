@@ -1,0 +1,11 @@
+- name: Share RDS Snapshot with another AWS Account
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: Share RDS snapshot with {{ENV}} aws account
+    command: "aws rds modify-db-snapshot-attribute --db-snapshot-identifier {{rds_snapshot}} --attribute-name restore --values-to-add {{aws_id}}"
+    become: yes
+    become_user: "{{username}}"
+    register: get_output
+
+  - debug: var=get_output

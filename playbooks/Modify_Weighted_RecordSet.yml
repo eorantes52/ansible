@@ -1,0 +1,32 @@
+- name: Retrieve Value of Weighted Record Set on Route 53 and modify the Set ID with old instead new
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "get value of Record Set {{record_set}} with Set ID new"
+    route53:
+      command: get
+      zone: "{{hosted_zone}}"
+      record: "{{record_set}}"
+      type: CNAME
+      identifier: new
+      weight: "{{weight}}"
+    register: record_new
+
+  - debug: var=record_new
+
+  - name: "modify Record Set {{record_set}} with Set ID old instead new using the results from the get command"
+    route53:
+      command: create
+      region: "{{region | default('us-west-2')}}"
+      zone: "{{hosted_zone}}"
+      record: "{{record_old.set.record}}"
+      type: "{{record_old.set.type}}"
+      ttl: "{{record_old.set.ttl}}"
+      value: "{{record_old.set.value}}"
+      identifier: old
+      weight: "{{record_old.set.weight}}"
+      overwrite: yes
+    register: rec
+    delay: 90
+
+  - debug: var=rec

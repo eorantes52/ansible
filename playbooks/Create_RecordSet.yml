@@ -1,0 +1,17 @@
+- name: Create/Modify Record Set Route 53
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "Creating Route 53-> {{record_set}} with value -> {{record_value}}"
+    route53:
+      command: create
+      zone: "{{hosted_zone}}"
+      record: "{{record_set}}"
+      type: "{{record_type}}"
+      ttl: 60
+      value: "{{record_value}}"
+      overwrite: yes
+    register: route53_output
+    delay: 90
+
+  - debug: var=route53_output

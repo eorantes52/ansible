@@ -1,0 +1,46 @@
+- name: Restore RDS from snapshot
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "Restore RDS {{rds_instance}} from snapshot {{rds_snapshot}}"
+    rds:
+      command: restore
+      region: "{{region | default('us-east-1')}}"
+      subnet: "{{vpc_subnet | default('default')}}"
+      snapshot: "{{rds_snapshot}}"
+      instance_name: "{{rds_instance}}"
+      instance_type: "{{rds_type}}"
+    register: rds
+    until: rds.instance.status == "available"
+    retries: 40
+    delay: 60
+
+  - debug: var=rds
+
+  - name: Modify Securit Group
+    rds:
+      command: modify
+      region: "{{region | default('us-east-1')}}"
+      instance_name: "{{rds_instance}}"
+      vpc_security_groups: "{{rds_sg}}"
+      apply_immediately: yes
+    register: rds_facts
+    until: rds_facts.instance.status == "modifying"
+    retries: 3
+    delay: 15
+    ignore_errors: True
+
+  - name: Get RDS facts until status is available
+    rds:
+      command: facts
+      instance_name: "{{rds_instance}}"
+      region: "{{region | default('us-east-1')}}"
+    register: rds_facts
+    until: rds_facts.instance.status == "available"
+    retries: 40
+    delay: 60
+
+  - debug:
+      msg: "The new db endpoint is {{ rds_facts.instance.endpoint }}"
+
+  - copy: content="{{ rds_facts.instance.endpoint }}" dest=./rds.info

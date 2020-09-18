@@ -1,0 +1,20 @@
+- name: create an alias record set on private zone
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "Creating alias record-> {{record_set}} with value-> {{record_value}}"
+    route53:
+      command: create
+      zone: "{{hosted_zone}}"
+      record: "{{record_set}}"
+      type: A
+      value: "{{record_value}}"
+      overwrite: yes
+      alias: True
+      alias_hosted_zone_id: "{{elb_hosted_zone_id}}"
+      alias_evaluate_target_health: True
+      private_zone: true
+      vpc_id: "{{vpc_id}}"
+    register: route53_output
+
+  - debug: var=route53_output

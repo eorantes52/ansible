@@ -1,0 +1,9 @@
+- name: deregister ami of ec2 instance (delete associated snapshots too)
+  hosts: "{{target}}"
+  tasks:
+
+  - ec2_ami:
+      region: "{{region | default('us-east-1')}}"
+      image_id: "{{AmiID}}"
+      delete_snapshot: True
+      state: absent

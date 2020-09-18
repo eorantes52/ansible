@@ -1,0 +1,20 @@
+- name: Retrieve Value for Weighted Record Set on Route 53
+  hosts: "{{target}}"
+  tasks: 
+
+  - name: "get value of Record Set {{record_set}} with Set ID old"
+    route53:
+      command: get
+      zone: "{{hosted_zone}}"
+      record: "{{record_set}}"
+      type: CNAME
+      weight: "{{weight}}"
+      identifier: "{{identifier}}"
+    register: rec
+
+  - debug: var=rec.set.value.split('.')[0]
+
+  - set_fact:
+      old_record_output: "{{rec.value.split('.')[0]}}"
+
+  - copy: content="{{ old_record_output }}" dest=./old_recordset.info
